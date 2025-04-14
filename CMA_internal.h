@@ -75,7 +75,7 @@ struct Block	*find_free_block(size_t size);
 struct Block	*merge_block(struct Block *block);
 bool 			is_valid_block(void *ptr);
 
-inline __attribute__((always_inline, hot)) size_t align8(size_t size)
+inline __attribute__((always_inline, hot)) size_t align16(size_t size)
 {
     return (size + 15) & ~15;
 }

@@ -40,12 +40,6 @@ static int8_t determine_which_block_to_use(size_t size)
     return (2);
 }
 
-static void *create_stack_block(void)
-{
-    static char memory_block[PAGE_SIZE];
-    return (memory_block);
-}
-
 struct Block* split_block(struct Block* block, size_t size)
 {
     if (block->size <= size + sizeof(struct Block))
@@ -66,49 +60,20 @@ struct Block* split_block(struct Block* block, size_t size)
 struct Page *create_page(size_t size)
 {
     size_t page_size = determine_page_size(size);
-    bool use_heap = true;
-
-    if (page_list == NULL)
+    if (size + sizeof(struct Block) > page_size)
+        page_size = size + sizeof(struct Block);
+    void* ptr = mmap(NULL, page_size, PROT_READ | PROT_WRITE,
+                     MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    if (ptr == MAP_FAILED)
+        return (NULL);
+    struct Page* page = (struct Page*) mmap(NULL, sizeof(struct Page),
+            PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    if (page == MAP_FAILED)
     {
-        page_size = PAGE_SIZE;
-        use_heap = false;
+        munmap(ptr, page_size);
+        return (NULL);
     }
-    else
-    {
-        if (size + sizeof(struct Block) > determine_page_size(size))
-            page_size = size + sizeof(struct Block);
-    }
-    void* ptr = NULL;
-    if (use_heap)
-    {
-        ptr = mmap(NULL, page_size, PROT_READ | PROT_WRITE,
-                   MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-        if (ptr == MAP_FAILED)
-            return (NULL);
-    }
-    else
-    {
-        ptr = create_stack_block();
-        if (!ptr)
-            return (NULL);
-    }
-    struct Page* page = NULL;
-    if (use_heap)
-    {
-        page = (struct Page*) mmap(NULL, sizeof(struct Page), PROT_READ | PROT_WRITE,
-                            MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-        if (page == MAP_FAILED)
-        {
-            munmap(ptr, page_size);
-            return (NULL);
-        }
-    }
-    else
-    {
-        static struct Page stack_page;
-        page = &stack_page;
-    }
-    page->heap = use_heap;
+    page->heap = true;
     page->start = ptr;
     page->size = page_size;
     page->next = NULL;
@@ -120,17 +85,13 @@ struct Page *create_page(size_t size)
     page->blocks->next = NULL;
     page->blocks->prev = NULL;
     determine_page_use(page);
-    if (!page_list) {
-        page_list = page;
-    }
-    else
-    {
-        page->next = page_list;
+    page->next = page_list;
+    if (page_list)
         page_list->prev = page;
-        page_list = page;
-    }
+    page_list = page;
     return (page);
 }
+
 
 struct Block *find_free_block(size_t size)
 {

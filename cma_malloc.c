@@ -10,7 +10,7 @@ void *malloc(size_t size)
 {
 	if (size <= 0)
         return (NULL);
-    size_t aligned_size = align8(size);
+    size_t aligned_size = align16(size);
     struct Block *block = find_free_block(aligned_size);
     if (!block)
     {
