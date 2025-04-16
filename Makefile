@@ -11,7 +11,7 @@ CC      = gcc
 CFLAGS  = -Wall -Wextra -Werror -std=c99 -fPIC
 
 # Source files for the project
-SRC     = cma_free.c cma_malloc.c cma_realloc.c cma_utils.c
+SRC     = cma_free.c cma_malloc.c cma_realloc.c cma_utils.c write_blocks.c
 OBJ     = $(SRC:.c=.o)
 DEP     = $(OBJ:.o=.d)
 
