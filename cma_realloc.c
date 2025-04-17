@@ -11,12 +11,12 @@
 static int reallocate_block(void *ptr, size_t new_size)
 {
     if (!ptr)
-        return -1;
+        return (-1);
     struct Block* block = (struct Block*)((char*)ptr - sizeof(struct Block));
     if (block->size >= new_size)
     {
         split_block(block, new_size);
-        return 0;
+        return (0);
     }
     if (block->next && block->next->free &&
         (block->size + sizeof(struct Block) + block->next->size) >= new_size)
@@ -26,9 +26,9 @@ static int reallocate_block(void *ptr, size_t new_size)
         if (block->next)
             block->next->prev = block;
         split_block(block, new_size);
-        return 0;
+        return (0);
     }
-    return -1;
+    return (-1);
 }
 
 void *realloc(void* ptr, size_t new_size)
@@ -39,6 +39,7 @@ void *realloc(void* ptr, size_t new_size)
         return (NULL);
 	if (!is_valid_block(ptr))
 		return (NULL);
+	new_size = align16(new_size);
 	struct Block* old_block = (struct Block*)((char*)ptr - sizeof(struct Block));
 	if (old_block->magic != MAGIC_NUMBER)
         raise(SIGABRT);

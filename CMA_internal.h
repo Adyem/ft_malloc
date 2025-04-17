@@ -67,6 +67,11 @@ struct Page
 	int8_t			alloc_size_type;	
 } __attribute__ ((aligned(16)));
 
+_Static_assert(sizeof(struct Block) % 16 == 0,
+               "Block header must be 16‑byte multiple");
+_Static_assert(sizeof(struct Page) % 16 == 0,
+               "Block header must be 16‑byte multiple");
+
 extern struct Page *page_list;
 
 struct Block	*split_block(struct Block *block, size_t size);

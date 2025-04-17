@@ -36,10 +36,6 @@ $(LIB_NAME): $(OBJ)
 $(SYMLINK): $(LIB_NAME)
 	ln -sf $(LIB_NAME) $(SYMLINK)
 
-# Debug target: adds -DDEBUG flag and links additional (currently empty) debug objects.
-debug: CFLAGS += -DDEBUG
-debug: $(TARGET)_debug
-
 $(TARGET)_debug: $(OBJ) $(DEBUG_OBJ)
 	$(CC) $(CFLAGS) -o $(TARGET)_debug $(OBJ) $(DEBUG_OBJ)
 
@@ -61,4 +57,4 @@ fclean: clean
 # 're' target cleans everything and rebuilds.
 re: fclean all
 
-.PHONY: all clean fclean debug re
+.PHONY: all clean fclean re
