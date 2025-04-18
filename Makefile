@@ -1,60 +1,58 @@
+###############################################################################
+#                                ft_malloc                                    #
+###############################################################################
+
+# ─────────────────────────────  HOSTTYPE  ────────────────────────────────────
 ifeq ($(HOSTTYPE),)
 HOSTTYPE := $(shell uname -m)_$(shell uname -s)
 endif
 
-# Library names and symbolic link
-LIB_NAME = libft_malloc_$(HOSTTYPE).so
-SYMLINK  = libft_malloc.so
+# ─────────────────────────────  NAMES  ───────────────────────────────────────
+NAME := libft_malloc_$(HOSTTYPE).so      # real shared object
+LINK := libft_malloc.so                  # mandatory symlink
 
-# Compiler and flags (added -fPIC for shared library support)
-CC      = gcc
-CFLAGS  = -Wall -Wextra -Werror -std=c99 -fPIC
+# ─────────────────────────────  TOOLCHAIN  ───────────────────────────────────
+CC      := gcc
+CFLAGS  := -Wall -Wextra -Werror -std=c99 -fPIC
 
-# Source files for the project
-SRC     = cma_free.c cma_malloc.c cma_realloc.c cma_utils.c write_blocks.c
-OBJ     = $(SRC:.c=.o)
-DEP     = $(OBJ:.o=.d)
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)                 # macOS
+LDFLAGS := -shared -Wl,-install_name,$(NAME)
+else                                     # Linux / BSD
+LDFLAGS := -shared -Wl,-soname,$(NAME)
+endif
 
-# Test executable name
-TARGET  = cma
+# ─────────────────────────────  FILE LISTS  ──────────────────────────────────
+SRC     := cma_free.c cma_malloc.c cma_realloc.c cma_utils.c write_blocks.c
+OBJ_DIR := .obj
+OBJ     := $(addprefix $(OBJ_DIR)/,$(SRC:.c=.o))
+DEP     := $(OBJ:.o=.d)
 
-# Extra debug sources (empty for now; add files as needed)
-DEBUG_SRC =
-DEBUG_OBJ = $(DEBUG_SRC:.c=.o)
+# ─────────────────────────────  DEFAULT TARGET  ──────────────────────────────
+all: $(LINK)
 
-# Default target: builds the executable, the shared library, and the symlink.
-all: $(LIB_NAME) $(SYMLINK)
+# ─────────────────────────────  BUILD RULES  ─────────────────────────────────
+# Compile each .c ⇒ .o (dependency files auto‑generated with -MMD)
+$(OBJ_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
-$(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
+# Link the shared object
+$(NAME): $(OBJ)
+	$(CC) $(LDFLAGS) $^ -o $@
 
-# Build the shared library using the same object files.
-$(LIB_NAME): $(OBJ)
-	$(CC) $(CFLAGS) -shared -o $(LIB_NAME) $(OBJ)
+# Create / update the symlink
+$(LINK): $(NAME)
+	ln -sf $(NAME) $(LINK)
 
-# Create or update the symbolic link.
-$(SYMLINK): $(LIB_NAME)
-	ln -sf $(LIB_NAME) $(SYMLINK)
-
-$(TARGET)_debug: $(OBJ) $(DEBUG_OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET)_debug $(OBJ) $(DEBUG_OBJ)
-
-# Rule to compile .c files into .o files and generate dependency files.
-%.o: %.c CMA.h CMA_internal.h
-	$(CC) $(CFLAGS) -MMD -c $< -o $@
-
-# Include dependency files if available.
--include $(DEP)
-
-# 'clean' only removes object and dependency files.
+# ─────────────────────────────  HOUSEKEEPING  ───────────────────────────────
 clean:
-	rm -f $(OBJ) $(DEP)
+	$(RM) -rf $(OBJ_DIR)
 
-# 'fclean' removes everything including executables, library, and symlink.
 fclean: clean
-	rm -f $(TARGET) $(TARGET)_debug $(LIB_NAME) $(SYMLINK)
+	$(RM) $(NAME) $(LINK)
 
-# 're' target cleans everything and rebuilds.
 re: fclean all
 
 .PHONY: all clean fclean re
+-include $(DEP)

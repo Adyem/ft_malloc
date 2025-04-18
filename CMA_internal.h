@@ -15,13 +15,22 @@
 
 #define OFFSWITCH 0
 
-#define SIZE 100
-#define SMALL_SIZE (SIZE)
-#define MEDIUM_SIZE (SIZE * 10)
+/* ─────────── core limits (one per class) ─────────── */
+#define SMALL_PAYLOAD_LIMIT   1024                 /* ≤ 1 KiB  → “small”  */
+#define MEDIUM_PAYLOAD_LIMIT  (SMALL_PAYLOAD_LIMIT * 16)  /* ≤ 16 KiB → “medium” */
 
-#define BASE_SIZE 100 * (SIZE + sizeof(struct Block))
-#define SMALL_ALLOC (BASE_SIZE * 1)
-#define MEDIUM_ALLOC (BASE_SIZE * 10)
+/* ─────────── helper sizes (payload + header) ─────── */
+#define SMALL_BLOCK_BYTES  (SMALL_PAYLOAD_LIMIT  + sizeof(struct Block))
+#define MEDIUM_BLOCK_BYTES (MEDIUM_PAYLOAD_LIMIT + sizeof(struct Block))
+
+/* ─────────── public names your code already uses ─── */
+#define SMALL_SIZE    (SMALL_PAYLOAD_LIMIT)
+#define MEDIUM_SIZE   (MEDIUM_PAYLOAD_LIMIT)
+
+/* one zone must hold ≥ 100 blocks of its own class */
+#define BASE_SIZE     (100 * SMALL_BLOCK_BYTES)
+#define SMALL_ALLOC   (BASE_SIZE)
+#define MEDIUM_ALLOC  (100 * MEDIUM_BLOCK_BYTES)
 
 #ifndef MAP_ANONYMOUS
   #ifdef MAP_ANON
