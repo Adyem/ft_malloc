@@ -15,33 +15,18 @@
 
 #define OFFSWITCH 0
 
-/* ─────────── core limits (one per class) ─────────── */
-#define SMALL_PAYLOAD_LIMIT   1024                 /* ≤ 1 KiB  → “small”  */
-#define MEDIUM_PAYLOAD_LIMIT  (SMALL_PAYLOAD_LIMIT * 16)  /* ≤ 16 KiB → “medium” */
+#define SMALL_PAYLOAD_LIMIT   1024
+#define MEDIUM_PAYLOAD_LIMIT  (SMALL_PAYLOAD_LIMIT * 16)
 
-/* ─────────── helper sizes (payload + header) ─────── */
 #define SMALL_BLOCK_BYTES  (SMALL_PAYLOAD_LIMIT  + sizeof(struct Block))
 #define MEDIUM_BLOCK_BYTES (MEDIUM_PAYLOAD_LIMIT + sizeof(struct Block))
 
-/* ─────────── public names your code already uses ─── */
 #define SMALL_SIZE    (SMALL_PAYLOAD_LIMIT)
 #define MEDIUM_SIZE   (MEDIUM_PAYLOAD_LIMIT)
 
-/* one zone must hold ≥ 100 blocks of its own class */
 #define BASE_SIZE     (100 * SMALL_BLOCK_BYTES)
 #define SMALL_ALLOC   (BASE_SIZE)
 #define MEDIUM_ALLOC  (100 * MEDIUM_BLOCK_BYTES)
-
-#ifndef MAP_ANONYMOUS
-  #ifdef MAP_ANON
-    #define MAP_ANONYMOUS MAP_ANON
-  #elif defined(__linux__)
-    /* On Linux, MAP_ANONYMOUS is normally 0x20 */
-    #define MAP_ANONYMOUS 0x20
-  #else
-    #error "Neither MAP_ANONYMOUS nor MAP_ANON is defined on this system. Define one of them manually."
-  #endif
-#endif
 
 #ifndef DEBUG
 # define DEBUG 0
