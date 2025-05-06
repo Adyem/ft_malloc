@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <pthread.h>
+#include <sys/mman.h>
 #include "CMA_internal.h"
 
 void *malloc(size_t size)

@@ -13,7 +13,7 @@ LINK := libft_malloc.so                  # mandatory symlink
 
 # ─────────────────────────────  TOOLCHAIN  ───────────────────────────────────
 CC      := gcc
-CFLAGS  := -Wall -Wextra -Werror -std=c99 -fPIC
+CFLAGS  := -Wall -Wextra -Werror -std=c99 -fPIC -D_DEFAULT_SOURCE
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)                 # macOS

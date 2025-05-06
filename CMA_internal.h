@@ -9,6 +9,10 @@
 #include <stdbool.h>
 #include <sys/mman.h>
 
+#if !defined(MAP_ANONYMOUS) && defined(MAP_ANON)
+#define MAP_ANONYMOUS MAP_ANON
+#endif
+
 #define PAGE_SIZE 131072
 #define BYPASS_ALLOC DEBUG
 #define MAGIC_NUMBER 0xDEADBEEF
